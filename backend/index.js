@@ -1,7 +1,8 @@
 const express = require("express");
-const {copyFileInsideS3} = require("./s3.js");
+const {copyFileInsideS3, fetchAllFilesFromS3AndCopyToLocalMachine} = require("./s3.js");
 const {mainWS} = require("./ws.js");
 const {createServer} = require("http");
+const path = require("path");
 
 const app = express();
 const httpServer = createServer(app);
@@ -15,7 +16,10 @@ httpServer.listen(4000, ()=>{
 })
 
 //SOCKET
-mainWS(httpServer);
+//mainWS(httpServer);
+
+
+
 
 // ROUTES
 app.post("/project", async (req, res) => {
@@ -38,7 +42,14 @@ app.post("/project", async (req, res) => {
     res.send("Project created");
 });
 
-// const bucketName = "replparthmern";
-// const sourceFolder = "base/nodejs";
-// const destinationFolder  = "code/userId/replid";
-// copyFileInsideS3(bucketName, sourceFolder, destinationFolder); // working
+async function main(){
+    const bucketName = "replparthmern";
+const sourceFolder = "base/nodejs";
+const destinationFolder  = "code/userId/replid";
+await copyFileInsideS3(bucketName, sourceFolder, destinationFolder); // working
+
+
+await fetchAllFilesFromS3AndCopyToLocalMachine(`code/userId/replid`, path.join(__dirname, `../tmp/${123}`));
+}
+
+main();
