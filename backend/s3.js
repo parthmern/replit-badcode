@@ -49,13 +49,13 @@ async function copyFileInsideS3(bucketName, sourceFolder, destinationFolder ) {
           };
     
           await s3.copyObject(copyParams).promise();
-          console.log(`Copied: ${sourceKey} ➝ ${destinationKey}`);
+          console.log(`Copied inside S3: ${sourceKey} ➝ ${destinationKey}`);
         }
     
         console.log("✅ All files copied successfully!");
       } catch (error) {
         console.error("❌ Error copying files:", error);
-      }
+    }
     
 }
 

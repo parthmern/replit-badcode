@@ -47,13 +47,13 @@ app.post("/project", async (req, res) => {
 });
 
 async function main(){
-    const bucketName = "replparthmern";
-const sourceFolder = "base/nodejs";
-const destinationFolder  = "code/userId/replid";
-await copyFileInsideS3(bucketName, sourceFolder, destinationFolder); // working
+//     const bucketName = "replparthmern";
+// const sourceFolder = "base/nodejs";
+// const destinationFolder  = "code/userId/replid";
+// await copyFileInsideS3(bucketName, sourceFolder, destinationFolder); // working
 
 
-await fetchAllFilesFromS3AndCopyToLocalMachine(`code/userId/replid`, path.join(__dirname, `../tmp/${123}`));
+// await fetchAllFilesFromS3AndCopyToLocalMachine(`code/userId/replid`, path.join(__dirname, `../tmp/${123}`));
 }
 
 main();
