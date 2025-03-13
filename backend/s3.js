@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const path = require("path");
 const fs = require('fs');
 
+const {createFolder, writeFile} = require("./helper.js");
 
 
 dotenv.config();
@@ -73,64 +74,42 @@ async function fetchAllFilesFromS3AndCopyToLocalMachine(fileName, localPath) {
                 const filePath = file.Key;
                 console.log(`${index + 1} FILE -> `, filePath);
 
-                if (filePath) {
+                // Skip if the key ends with '/' as it's a directory
+                if (filePath && !filePath.endsWith('/')) {
                     const getObjectParams = {
                         Bucket: process.env.S3_BUCKET ?? "",
                         Key: filePath
                     };
+                    
                     const FILE = await s3.getObject(getObjectParams).promise();
                     console.log(`${filePath} ==> ${JSON.stringify(FILE)}`);
 
-                    // Save the file to the local machine using writeFile
-                    const localFilePath = path.join(localPath, filePath);  // Ensure proper directory structure
+                    
+                    const localFilePath = path.join(localPath, filePath);
 
                     // Ensure the directory exists before writing the file
                     await createFolder(path.dirname(localFilePath)); // Ensure that parent directories exist
-                    await writeFile(localFilePath, FILE.Body);
-                    console.log(`File saved to ${localFilePath}`);
+                    
+                    // file means (ContentLength > 0)
+                    if (FILE.ContentLength > 0) {   
+                        await writeFile(localFilePath, FILE.Body);
+                        console.log(`File saved to ${localFilePath}`);
+                    } else {    
+                        // else Folder
+                        await createFolder(localFilePath);
+                        console.log(`Directory created at ${localFilePath}`);
+                    }
+                } else {
+                    // Handle directory objects
+                    const localDirPath = path.join(localPath, filePath);
+                    await createFolder(localDirPath);
+                    console.log(`Directory created at ${localDirPath}`);
                 }
             }
         }
 
     } catch (error) {
         console.log(error);
-    }
-}
-
-function writeFile(filePath, fileData) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            await createFolder(path.dirname(filePath));  // Ensure the folder exists
-
-            fs.writeFile(filePath, fileData, (err) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
-        } catch (err) {
-            reject(err); // Catch any errors during folder creation
-        }
-    });
-}
-
-async function createFolder(dirName) {
-    try {
-        const stats = await fs.promises.stat(dirName).catch(() => null);
-
-        if (stats) {
-            if (stats.isDirectory()) return; // ✅ Already a directory, no need to create
-
-            // ❌ Exists but is a file - Delete it first
-            await fs.promises.unlink(dirName);
-        }
-
-        // Now, create the directory
-        await fs.promises.mkdir(dirName, { recursive: true });
-    } catch (err) {
-        if (err.code !== "ENOENT") throw err; // ❌ Some other error
-        await fs.promises.mkdir(dirName, { recursive: true });
     }
 }
 

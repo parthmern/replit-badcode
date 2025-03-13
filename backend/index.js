@@ -3,8 +3,12 @@ const {copyFileInsideS3, fetchAllFilesFromS3AndCopyToLocalMachine} = require("./
 const {mainWS} = require("./ws.js");
 const {createServer} = require("http");
 const path = require("path");
+var cors = require('cors')
+
+
 
 const app = express();
+app.use(cors())
 const httpServer = createServer(app);
 
 app.get("/", (req, res)=>{
@@ -14,9 +18,9 @@ app.get("/", (req, res)=>{
 httpServer.listen(4000, ()=>{
     console.log("runnign 4000 port")
 })
-
+ 
 //SOCKET
-//mainWS(httpServer);
+mainWS(httpServer);
 
 
 
